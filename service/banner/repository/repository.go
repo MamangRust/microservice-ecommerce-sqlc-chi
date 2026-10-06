@@ -1,0 +1,18 @@
+package repository
+
+import (
+	db "github.com/MamangRust/microservice-ecommerce-grpc-banner/database/schema"
+)
+
+type Repositories struct {
+	BannerQuery   BannerQueryRepository
+	BannerCommand BannerCommandRepository
+}
+
+func NewRepositories(db *db.Queries) *Repositories {
+
+	return &Repositories{
+		BannerQuery:   NewBannerQueryRepository(db),
+		BannerCommand: NewBannerCommandRepository(db),
+	}
+}

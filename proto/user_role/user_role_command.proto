@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package pb.user_role;
+
+import "google/protobuf/empty.proto";
+import "user_role/user_role_common.proto";
+
+option go_package = "github.com/MamangRust/microservice-ecommerce-grpc-pb/user_role;pb_user_role";
+
+service UserRoleCommandService {
+    rpc AssignRoleToUser(AssignRoleToUserRequest) returns (ApiResponseUserRole);
+    rpc RemoveRoleFromUser(RemoveRoleFromUserRequest) returns (google.protobuf.Empty);
+}

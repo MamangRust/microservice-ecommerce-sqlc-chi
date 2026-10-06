@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package pb.user_role;
+
+import "role/role_common.proto";
+import "user_role/user_role_common.proto";
+
+option go_package = "github.com/MamangRust/microservice-ecommerce-grpc-pb/user_role;pb_user_role";
+
+service UserRoleQueryService {
+    rpc FindByUserId(FindByIdUserRoleRequest) returns (pb.role.ApiResponsesRole);
+}

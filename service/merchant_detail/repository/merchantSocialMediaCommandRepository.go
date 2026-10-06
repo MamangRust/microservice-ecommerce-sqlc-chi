@@ -1,0 +1,117 @@
+package repository
+
+import (
+	"context"
+	"errors"
+	"github.com/jackc/pgx/v5"
+
+	db "github.com/MamangRust/microservice-ecommerce-grpc-merchant_detail/database/schema"
+	"github.com/MamangRust/microservice-ecommerce-shared/domain/requests"
+	merchant_social_link_errors "github.com/MamangRust/microservice-ecommerce-shared/errors/merchant_social_link_errors"
+)
+
+type merchantSocialLinkCommandRepository struct {
+	db *db.Queries
+}
+
+func NewMerchantSocialLinkCommandRepository(db *db.Queries) *merchantSocialLinkCommandRepository {
+	return &merchantSocialLinkCommandRepository{
+		db: db,
+	}
+}
+
+func (r *merchantSocialLinkCommandRepository) Create(ctx context.Context, req *requests.CreateMerchantSocialRequest) (*db.CreateMerchantSocialMediaLinkRow, error) {
+	params := db.CreateMerchantSocialMediaLinkParams{
+		MerchantDetailID: int32(*req.MerchantDetailID),
+		Platform:         req.Platform,
+		Url:              req.Url,
+	}
+
+	res, err := r.db.CreateMerchantSocialMediaLink(ctx, params)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, merchant_social_link_errors.ErrMerchantSocialLinkNotFound
+		}
+		return nil, merchant_social_link_errors.ErrCreateMerchantSocialLink.WithInternal(err)
+	}
+
+	return res, nil
+}
+
+func (r *merchantSocialLinkCommandRepository) Update(ctx context.Context, req *requests.UpdateMerchantSocialRequest) (*db.UpdateMerchantSocialMediaLinkRow, error) {
+	params := db.UpdateMerchantSocialMediaLinkParams{
+		MerchantSocialID: int32(req.ID),
+		Platform:         req.Platform,
+		Url:              req.Url,
+	}
+
+	res, err := r.db.UpdateMerchantSocialMediaLink(ctx, params)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, merchant_social_link_errors.ErrMerchantSocialLinkNotFound
+		}
+		return nil, merchant_social_link_errors.ErrUpdateMerchantSocialLink.WithInternal(err)
+	}
+
+	return res, nil
+}
+
+func (r *merchantSocialLinkCommandRepository) Trash(ctx context.Context, socialID int) (bool, error) {
+	_, err := r.db.TrashMerchantSocialMediaLink(ctx, int32(socialID))
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return false, merchant_social_link_errors.ErrMerchantSocialLinkNotFound
+		}
+		return false, merchant_social_link_errors.ErrTrashMerchantSocialLink.WithInternal(err)
+	}
+
+	return true, nil
+}
+
+func (r *merchantSocialLinkCommandRepository) Restore(ctx context.Context, socialID int) (bool, error) {
+	_, err := r.db.RestoreMerchantSocialMediaLink(ctx, int32(socialID))
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return false, merchant_social_link_errors.ErrMerchantSocialLinkNotFound
+		}
+		return false, merchant_social_link_errors.ErrRestoreMerchantSocialLink.WithInternal(err)
+	}
+
+	return true, nil
+}
+
+func (r *merchantSocialLinkCommandRepository) DeletePermanent(ctx context.Context, socialID int) (bool, error) {
+	err := r.db.DeleteMerchantSocialMediaLinkPermanently(ctx, int32(socialID))
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return false, merchant_social_link_errors.ErrMerchantSocialLinkNotFound
+		}
+		return false, merchant_social_link_errors.ErrDeletePermanentMerchantSocialLink.WithInternal(err)
+	}
+
+	return true, nil
+}
+
+func (r *merchantSocialLinkCommandRepository) RestoreAll(ctx context.Context) (bool, error) {
+	err := r.db.RestoreAllMerchantSocialMediaLinks(ctx)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return false, merchant_social_link_errors.ErrMerchantSocialLinkNotFound
+		}
+		return false, merchant_social_link_errors.ErrRestoreAllMerchantSocialLinks.WithInternal(err)
+	}
+
+	return true, nil
+}
+
+func (r *merchantSocialLinkCommandRepository) DeleteAll(ctx context.Context) (bool, error) {
+	err := r.db.DeleteAllMerchantSocialMediaLinksPermanently(ctx)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return false, merchant_social_link_errors.ErrMerchantSocialLinkNotFound
+		}
+		return false, merchant_social_link_errors.ErrDeleteAllPermanentMerchantSocialLinks.WithInternal(err)
+	}
+
+	return true, nil
+}
